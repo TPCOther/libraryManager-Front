@@ -46,7 +46,7 @@ const useLoginEffect = () => {
     try {
       const result = await post('/user/login', loginData)
       if (result?.data !== null) {
-        localStorage.Login = result.data
+        localStorage.uid = result.data
       } else {
         ElMessage.error('密码或用户名错误')
       }
