@@ -90,6 +90,7 @@ export default {
   setup () {
     onMounted(() => {
       document.body.style.backgroundColor = '#409EFF'
+      document.body.style.margin = '0'
     })
     const { loginData, handleLogin } = useLoginEffect()
     const { registerData, handleRegister } = useRegisterEffect()
@@ -114,6 +115,7 @@ export default {
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
     border-radius: 4px;
     background-color: #fff;
+    text-align: center;
   }
 
   .header {
