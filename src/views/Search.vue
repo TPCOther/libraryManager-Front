@@ -24,28 +24,9 @@
 </template>
 
 <script>
-import { ref } from 'vue'
-import { get, post } from '../utils/request'
+import { post } from '../utils/request'
 import { ElMessage } from 'element-plus'
-
-const useSearchEffect = () => {
-  const bookList = ref({})
-  const keyWord = ref('')
-  const searchBook = async () => {
-    try {
-      const result = await get('/books', { name: keyWord.value })
-      if (result?.code === 200) {
-        bookList.value = result.data
-        console.log(bookList)
-      } else {
-        ElMessage.error('搜索失败')
-      }
-    } catch (e) {
-      ElMessage.error(e)
-    }
-  }
-  return { keyWord, searchBook, bookList }
-}
+import { useSearchEffect } from '../utils/searchBook'
 
 const useBorrowEffect = () => {
   const borrowBook = async (bid) => {
