@@ -42,3 +42,17 @@ export const put = (url, data = {}) => {
     })
   })
 }
+
+export const del = (url, data = {}) => {
+  return new Promise((resolve, reject) => {
+    instance.delete(url, { data: data }, {
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then((response) => {
+      resolve(response.data)
+    }, err => {
+      reject(err)
+    })
+  })
+}

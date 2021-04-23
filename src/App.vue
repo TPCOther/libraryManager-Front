@@ -9,6 +9,18 @@ export default {
 </script>
 
 <style>
+body {
+  padding: 0;
+  margin: 0;
+}
+
+::-webkit-scrollbar {
+  width: 0 !important;
+}
+::-webkit-scrollbar {
+  width: 0 !important;height: 0;
+}
+
 #app {
   position: absolute;
   font-family: Avenir, Helvetica, Arial, sans-serif;

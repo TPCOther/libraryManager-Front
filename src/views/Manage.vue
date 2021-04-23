@@ -4,16 +4,16 @@
     <div class="add">
       <div class="add_item">
       <span class="add_title">书名</span>
-      <el-input class="add_input" style="width: 200px"></el-input>
+      <el-input class="add_input" style="width: 200px" v-model="newBook.bname"></el-input>
       </div>
       <div class="add_item">
       <span class="add_title">作者</span>
-      <el-input class="add_input" style="width: 200px"></el-input>
+      <el-input class="add_input" style="width: 200px" v-model="newBook.author"></el-input>
       </div>
       <div class="add_item">
       <span class="add_title">出版日期</span>
       <el-date-picker
-      v-model="value1"
+      v-model="newBook.Bdate"
       type="date"
       placeholder="选择日期"
       class="add_date">
@@ -21,9 +21,9 @@
       </div>
       <div class="add_item">
       <span class="add_title">数量</span>
-      <el-input class="add_input" style="width: 200px"></el-input>
+      <el-input class="add_input" style="width: 200px" v-model="newBook.amount"></el-input>
       </div>
-      <el-button type="primary" class="add_button">新增</el-button>
+      <el-button type="primary" class="add_button" @click="addBook">新增</el-button>
     </div>
   </el-card>
   <el-card class="card" :body-style="{ 'text-align': 'center'}">
@@ -39,6 +39,7 @@
     <el-table
      :row-class-name="rowClassName"
      :data="bookList"
+     :row-style="{height: '65px'}"
      style="width: 100%">
       <el-table-column label="书名" min-width="20%">
          <template #default="scope">
@@ -55,7 +56,7 @@
       <el-table-column label="出版日期" min-width="20%">
         <template #default="scope">
            <span class="cell_text">{{scope.row.Bdate}}</span>
-           <el-input class="cell_input" v-model="currentData.Bdate"></el-input>
+           <el-input type="date" class="cell_input" v-model="currentData.Bdate"></el-input>
          </template>
       </el-table-column>
       <el-table-column label="数量" min-width="20%">
@@ -70,7 +71,7 @@
           @click="editBook(scope)"
           class="cell_button">修改</el-button>
           <el-button type="danger" size="mini"
-          @click="deleteBook(scope.row.bid)"
+          @click="deleteBook(scope.row)"
           class="cell_button">删除</el-button>
           <el-button type="primary" size="mini"
           @click="saveEdit(scope.row)"
@@ -87,50 +88,104 @@
 <script>
 import { useSearchEffect } from '../utils/searchBook'
 import { ref } from 'vue'
+import { put, post, del } from '../utils/request'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import moment from 'moment'
+
+const useEditEffect = () => {
+  const currentRow = ref(null)
+  const currentData = ref({
+    bname: '',
+    author: '',
+    Bdate: '',
+    amount: ''
+  })
+  const editBook = (val) => {
+    currentRow.value = val
+    currentData.value = { ...currentRow.value.row }
+  }
+  const cancelEdit = () => {
+    currentRow.value = null
+  }
+  const saveEdit = async (val) => {
+    try {
+      const result = await put('/books', currentData.value)
+      if (result?.code === 200) {
+        ElMessage.success(result.msg)
+        val.banme = currentData.value.banme
+        val.author = currentData.value.author
+        val.Bdate = currentData.value.Bdate
+        val.amount = currentData.value.amount
+      } else {
+        ElMessage.error(result.msg)
+      }
+    } catch (e) {
+      ElMessage.error(e)
+    }
+    currentRow.value = null
+  }
+  const rowClassName = (row) => {
+    if (currentRow?.value?.$index === row.rowIndex) {
+      return 'currentRow'
+    } else { return '' }
+  }
+  return { rowClassName, currentData, editBook, cancelEdit, saveEdit }
+}
+
+const useAddEffect = () => {
+  const newBook = ref({
+    bname: '',
+    author: '',
+    Bdate: '',
+    amount: ''
+  })
+
+  const addBook = async () => {
+    try {
+      newBook.value.Bdate = moment(newBook.value.Bdate).utcOffset(480).format('YYYY-MM-DD')
+      const result = await post('/books', newBook.value)
+      if (result?.code === 200) {
+        ElMessage.success(result.msg)
+      } else {
+        ElMessage.error(result.msg)
+      }
+    } catch (e) {
+      ElMessage.error(e)
+    }
+  }
+
+  return { newBook, addBook }
+}
+
 export default {
   name: 'Manage',
   setup () {
-    const currentRow = ref(null)
-    const currentData = ref({
-      bname: '',
-      author: '',
-      Bdate: '',
-      amount: ''
-    })
-    const editBook = (val) => {
-      currentRow.value = val
-      currentData.value = { ...currentRow.value.row }
-    }
-    const cancelEdit = () => {
-      currentRow.value = null
-    }
-    const saveEdit = (val) => {
-      val.banme = currentData.value.banme
-      val.author = currentData.value.author
-      val.Bdate = currentData.value.Bdate
-      val.amount = currentData.value.amount
-      currentRow.value = null
-    }
-    const rowClassName = (row) => {
-      if (currentRow?.value?.$index === row.rowIndex) {
-        return 'currentRow'
-      } else { return '' }
-    }
+    const { newBook, addBook } = useAddEffect()
+    const { rowClassName, currentData, editBook, cancelEdit, saveEdit } = useEditEffect()
     const { keyWord, searchBook, bookList } = useSearchEffect()
+
+    const deleteBook = (val) => {
+      ElMessageBox.confirm('您真的要从书库中删除这本书吗？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(async () => {
+        try {
+          const result = await del('/books', val)
+          if (result?.code === 200) {
+            ElMessage.success(result.msg)
+            bookList.value.spilce(bookList.value.indexOf(val), 1)
+          } else {
+            ElMessage.error(result.msg)
+          }
+        } catch (e) {
+          ElMessage.error(e)
+        }
+      })
+    }
+
     searchBook()
-    bookList.value = [{
-      bname: '机器学习',
-      author: '周志华',
-      Bdate: '2016-07-02',
-      amount: '2'
-    },
-    {
-      bname: '三体',
-      author: '刘慈欣',
-      Bdate: '2016-07-02',
-      amount: '2'
-    }]
-    return { bookList, keyWord, searchBook, editBook, saveEdit, cancelEdit, rowClassName, currentData }
+    return { bookList, keyWord, searchBook, editBook, saveEdit, cancelEdit, rowClassName, currentData, newBook, addBook, deleteBook }
   }
 }
 </script>
@@ -182,7 +237,8 @@ export default {
 
 .currentRow .cell {
   &_input {
-    display: inline;
+    display: inline-block;
+    width: 60%;
   }
   &_text {
     display: none;
