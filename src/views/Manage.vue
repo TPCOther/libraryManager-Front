@@ -40,22 +40,44 @@
      :row-class-name="rowClassName"
      :data="bookList"
      style="width: 100%">
-      <el-table-column label="书名" prop="bname">
+      <el-table-column label="书名" min-width="20%">
          <template #default="scope">
-           <span>{{scope.row.bname}}</span>
-           <el-input class="cell_input"></el-input>
+           <span class="cell_text">{{scope.row.bname}}</span>
+           <el-input class="cell_input" v-model="currentData.bname"></el-input>
          </template>
       </el-table-column>
-      <el-table-column label="作者" prop="author">
-      </el-table-column>
-      <el-table-column label="出版日期" prop="Bdate">
-      </el-table-column>
-      <el-table-column label="数量" prop="amount">
-      </el-table-column>
-      <el-table-column label="操作">
+      <el-table-column label="作者" min-width="20%">
         <template #default="scope">
-          <el-button type="primary" size="mini" @click="editbook(scope.$index)">修改</el-button>
-          <el-button type="danger" size="mini" @click="deleteBook(scope.row.bid)">删除</el-button>
+           <span class="cell_text">{{scope.row.author}}</span>
+           <el-input class="cell_input" v-model="currentData.author"></el-input>
+         </template>
+      </el-table-column>
+      <el-table-column label="出版日期" min-width="20%">
+        <template #default="scope">
+           <span class="cell_text">{{scope.row.Bdate}}</span>
+           <el-input class="cell_input" v-model="currentData.Bdate"></el-input>
+         </template>
+      </el-table-column>
+      <el-table-column label="数量" min-width="20%">
+        <template #default="scope">
+           <span class="cell_text">{{scope.row.amount}}</span>
+           <el-input class="cell_input" v-model="currentData.amount"></el-input>
+         </template>
+      </el-table-column>
+      <el-table-column label="操作" min-width="20%">
+        <template #default="scope">
+          <el-button type="primary" size="mini"
+          @click="editBook(scope)"
+          class="cell_button">修改</el-button>
+          <el-button type="danger" size="mini"
+          @click="deleteBook(scope.row.bid)"
+          class="cell_button">删除</el-button>
+          <el-button type="primary" size="mini"
+          @click="saveEdit(scope.row)"
+          class="cell_editbutton">保存</el-button>
+          <el-button type="danger" size="mini"
+          @click="cancelEdit"
+          class="cell_editbutton">取消</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -69,17 +91,46 @@ export default {
   name: 'Manage',
   setup () {
     const currentRow = ref(null)
-    const editbook = (val) => {
+    const currentData = ref({
+      bname: '',
+      author: '',
+      Bdate: '',
+      amount: ''
+    })
+    const editBook = (val) => {
       currentRow.value = val
+      currentData.value = { ...currentRow.value.row }
+    }
+    const cancelEdit = () => {
+      currentRow.value = null
+    }
+    const saveEdit = (val) => {
+      val.banme = currentData.value.banme
+      val.author = currentData.value.author
+      val.Bdate = currentData.value.Bdate
+      val.amount = currentData.value.amount
+      currentRow.value = null
     }
     const rowClassName = (row) => {
-      if (currentRow.value === row.rowIndex) {
+      if (currentRow?.value?.$index === row.rowIndex) {
         return 'currentRow'
       } else { return '' }
     }
     const { keyWord, searchBook, bookList } = useSearchEffect()
     searchBook()
-    return { bookList, keyWord, searchBook, editbook, rowClassName }
+    bookList.value = [{
+      bname: '机器学习',
+      author: '周志华',
+      Bdate: '2016-07-02',
+      amount: '2'
+    },
+    {
+      bname: '三体',
+      author: '刘慈欣',
+      Bdate: '2016-07-02',
+      amount: '2'
+    }]
+    return { bookList, keyWord, searchBook, editBook, saveEdit, cancelEdit, rowClassName, currentData }
   }
 }
 </script>
@@ -111,6 +162,36 @@ export default {
 .search {
   &_button {
     margin-left: 12px;
+  }
+}
+
+.cell {
+  &_input {
+    display: none;
+  }
+  &_text {
+    display: inline;
+  }
+  &_button {
+    display: inline;
+  }
+  &_editbutton {
+    display: none;
+  }
+}
+
+.currentRow .cell {
+  &_input {
+    display: inline;
+  }
+  &_text {
+    display: none;
+  }
+  &_button {
+    display: none;
+  }
+  &_editbutton {
+    display: inline;
   }
 }
 
