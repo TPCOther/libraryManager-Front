@@ -37,9 +37,14 @@
     </div>
     <el-divider></el-divider>
     <el-table
+     :row-class-name="rowClassName"
      :data="bookList"
      style="width: 100%">
       <el-table-column label="书名" prop="bname">
+         <template #default="scope">
+           <span>{{scope.row.bname}}</span>
+           <el-input class="cell_input"></el-input>
+         </template>
       </el-table-column>
       <el-table-column label="作者" prop="author">
       </el-table-column>
@@ -49,7 +54,7 @@
       </el-table-column>
       <el-table-column label="操作">
         <template #default="scope">
-          <el-button type="success" size="mini" @click="editBook(scope.row)">修改</el-button>
+          <el-button type="primary" size="mini" @click="editbook(scope.$index)">修改</el-button>
           <el-button type="danger" size="mini" @click="deleteBook(scope.row.bid)">删除</el-button>
         </template>
       </el-table-column>
@@ -59,13 +64,22 @@
 
 <script>
 import { useSearchEffect } from '../utils/searchBook'
-// import { ref } from 'vue'
+import { ref } from 'vue'
 export default {
   name: 'Manage',
   setup () {
+    const currentRow = ref(null)
+    const editbook = (val) => {
+      currentRow.value = val
+    }
+    const rowClassName = (row) => {
+      if (currentRow.value === row.rowIndex) {
+        return 'currentRow'
+      } else { return '' }
+    }
     const { keyWord, searchBook, bookList } = useSearchEffect()
     searchBook()
-    return { bookList, keyWord, searchBook }
+    return { bookList, keyWord, searchBook, editbook, rowClassName }
   }
 }
 </script>
