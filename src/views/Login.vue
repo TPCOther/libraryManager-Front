@@ -1,6 +1,9 @@
 <template>
   <div class="container">
-    <div class="header">图书管理系统</div>
+    <div class="header">
+      <icon-park type="bookshelf" class="header_icon" theme="two-tone" size="32" :fill="['#000000' ,'#f5a623']" :strokeWidth="3"/>
+      <span class="header_title">图书管理系统</span>
+      </div>
     <transition name="el-zoom-in-center" mode="out-in">
     <div class="login" v-if="isLogin">
       <div class="login_header">
@@ -39,14 +42,18 @@
 import { onMounted, reactive, ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import { post } from '../utils/request'
+import { useRouter } from 'vue-router'
+import { IconPark } from '@icon-park/vue-next/es/all'
 
 const useLoginEffect = () => {
+  const router = useRouter()
   const loginData = reactive({ Uname: '', Pwd: '' })
   const handleLogin = async () => {
     try {
       const result = await post('/user/login', loginData)
       if (result?.data !== null) {
         localStorage.uid = result.data
+        router.push('/my')
       } else {
         ElMessage.error('密码或用户名错误')
       }
@@ -87,6 +94,7 @@ const useRegisterEffect = () => {
 
 export default {
   name: 'Login',
+  components: { IconPark },
   setup () {
     onMounted(() => {
       document.body.style.backgroundColor = '#409EFF'
@@ -123,6 +131,13 @@ export default {
     font-size: 24px;
     font-weight: bold;
     margin-bottom: 16px;
+    &_title {
+      font-weight: bold;
+      margin-left: 12px;
+    }
+    &_icon {
+      vertical-align: -20%
+    }
   }
 
   .login , .register {

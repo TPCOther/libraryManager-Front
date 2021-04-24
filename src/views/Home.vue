@@ -1,6 +1,7 @@
 <template>
   <el-container class="container">
     <el-header class="header">
+      <icon-park type="bookshelf" class="header_icon" theme="two-tone" size="28" :fill="['#000000' ,'#f5a623']" :strokeWidth="3"/>
       <span class="header_title">图书管理系统</span>
     </el-header>
     <el-container>
@@ -23,10 +24,14 @@
 
 <script>
 import { useRoute } from 'vue-router'
+import { onMounted } from 'vue'
+import { IconPark } from '@icon-park/vue-next/es/all'
 
 export default {
   name: 'Home',
+  components: { IconPark },
   setup () {
+    onMounted(() => { document.body.style.backgroundColor = '#fff' })
     const route = useRoute()
     const nav = [{
       title: '我的图书馆',
@@ -61,10 +66,13 @@ export default {
 
 .header {
   position: relative;
-  border-bottom: 1px solid #000;
+  border-bottom: 1px solid #dee0e3;
   display: flex;
   align-items: center;
   &_title {
+    font-weight: bold;
+    font-size: 20px;
+    margin-left: 12px;
   }
 }
 
@@ -82,6 +90,7 @@ export default {
   right: 0;
   bottom: 0;
   overflow-y: scroll;
+  background-color: #e2cfaf;
 }
 
 .el-menu {
